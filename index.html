@@ -1,14 +1,46 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>LM Studio Demo</title>
+    <title>AI Application Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   </head>
   <body>
-    <h2>LM Studio Manager (windows)</h2>
-    <p id="status">檢查狀態...</p>
-    <button id="install">下載 & 安裝</button>
-    <button id="remove">移除</button>
+    <main class="p-8 bg-gray-100">
+      <h2>AI Application Manager (windows)</h2>
+      
+      <div class="flex flex-col gap-8 mt-4">
+        <div class="border rounded-lg w-100 p-4"
+          x-data="ApplicationManager({name: 'anythingllm'})" x-init="refreshStatus()">
+          <div class="flex justify-between">
+            <h3>AnythingLLM</h3>
+            <p class="rounded-md px-2 py-1 text-sm"
+                x-text="status"
+                :class="{'bg-green-100 text-green-600': status === 'installed',
+                          'bg-blue-100 text-blue-600': status === 'uninstalled',
+                          'bg-orange-100 text-orange-600': status === 'installing'}"></p>
+          </div>
+          
+          <button x-show="status == 'uninstalled'" class="cursor-pointer mt-4 border rounded-full px-3 py-1" @click="download">Download</button>
+          <button x-show="status == 'installed'" class="cursor-pointer mt-4 border rounded-full px-3 py-1" @click="remove">Remove</button>
+        </div>
 
+        <div class="border rounded-lg w-100 p-4"
+          x-data="ApplicationManager({name: 'lmstudio'})" x-init="refreshStatus()">
+          <div class="flex justify-between">
+            <h3>LM Studio</h3>
+            <p class="rounded-md px-2 py-1 text-sm"
+                x-text="status"
+                :class="{'bg-green-100 text-green-600': status === 'installed',
+                          'bg-blue-100 text-blue-600': status === 'uninstalled',
+                          'bg-orange-100 text-orange-600': status === 'installing'}"></p>
+          </div>
+          
+          <button x-show="status == 'uninstalled'" class="cursor-pointer mt-4 border rounded-full px-3 py-1" @click="download">Download</button>
+          <button x-show="status == 'installed'" class="cursor-pointer mt-4 border rounded-full px-3 py-1" @click="remove">Remove</button>
+          <div class="font-mediumn text-sm" x-show="downloadPercent != 0">Download Progress: <span x-text="downloadPercent"></span>%</div>
+      </div>
+    </main>
     <script src="renderer.js"></script>
   </body>
-</html>
+</html> 
