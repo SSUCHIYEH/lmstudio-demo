@@ -6,39 +6,57 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   </head>
   <body>
-    <main class="p-8 bg-gray-100">
-      <h2>AI Application Manager (windows)</h2>
-      
-      <div class="flex flex-col gap-8 mt-4">
-        <div class="border rounded-lg w-100 p-4"
-          x-data="ApplicationManager({name: 'anythingllm'})" x-init="refreshStatus()">
-          <div class="flex justify-between">
-            <h3>AnythingLLM</h3>
-            <p class="rounded-md px-2 py-1 text-sm"
-                x-text="status"
-                :class="{'bg-green-100 text-green-600': status === 'installed',
-                          'bg-blue-100 text-blue-600': status === 'uninstalled',
-                          'bg-orange-100 text-orange-600': status === 'installing'}"></p>
-          </div>
-          
-          <button x-show="status == 'uninstalled'" class="cursor-pointer mt-4 border rounded-full px-3 py-1" @click="download">Download</button>
-          <button x-show="status == 'installed'" class="cursor-pointer mt-4 border rounded-full px-3 py-1" @click="remove">Remove</button>
-        </div>
+    <main class="min-w-screen min-h-screen p-8 bg-gray-100/50"
+      x-data="{
+        applications: [
+        {
+          name: 'anythingllm',
+          displayName: 'AnythingLLM',
+          icon: './icons/anythingllm.png',
+          description: 'Everything great about AI in one desktop application.'
+        },
+        {
+          name: 'lmstudio',
+          displayName: 'LM Studio',
+          description: 'Run local AI models like gpt-oss, Qwen, Gemma, DeepSeek and many more on your computer, privately and for free.',
+          icon: './icons/lmstudio.png',
+        },
+        {
+          name: 'ollama',
+          displayName: 'Ollama',
+          description: 'Chat & build with open models.',
+          icon: './icons/ollama.png',
+        }]
+      }">
+      <div class="grid grid-cols-2 gap-4 mt-4 w-240 mx-auto">
+        <template x-for="app in applications" :key="app.name">
+          <div class="flex flex-col justify-between border-gray-300 shadow-md rounded-md p-4 bg-white"
+            x-data="ApplicationManager({name: app.name})" x-init="refreshStatus()">
+            <div class="grid grid-cols-5 gap-4">
+              <div class="col-span-1">
+                <img :src="app.icon" class="w-full h-auto" :alt="app.name" />
+              </div>
+              <div class="col-span-3">
+                <h3 class="font-bold" x-text="app.displayName"></h3>
+                <p class="mt-2 text-sm text-gray-700" x-text="app.description"></p>
+              </div>
+              <div class="col-span-1 flex justify-end">
+              <p  x-show="status == 'installed'"
+                  class="rounded-ms h-fit px-2 py-1 text-xs font-semibold uppercase"
+                  x-text="status"
+                  :class="{'bg-green-100 text-green-600': status === 'installed'}"></p>
+              </div>
+            </div>
 
-        <div class="border rounded-lg w-100 p-4"
-          x-data="ApplicationManager({name: 'lmstudio'})" x-init="refreshStatus()">
-          <div class="flex justify-between">
-            <h3>LM Studio</h3>
-            <p class="rounded-md px-2 py-1 text-sm"
-                x-text="status"
-                :class="{'bg-green-100 text-green-600': status === 'installed',
-                          'bg-blue-100 text-blue-600': status === 'uninstalled',
-                          'bg-orange-100 text-orange-600': status === 'installing'}"></p>
+            <div  class="flex justify-end">
+              <button x-show="status == 'uninstalled'" class="cursor-pointer mt-4 rounded-md px-3 py-2 bg-gray-700 hover:bg-gray-700/80 text-sm text-white" @click="download">Download</button>
+              <button x-show="status == 'installed'" class="cursor-pointer mt-4 rounded-md px-3 py-2 bg-gray-500 hover:bg-gray-500/80 text-sm text-white" @click="remove">Remove</button>
+              <div class="font-medium text-sm text-gray-600 font-medium" x-show="downloadPercent != 0 && status != 'installing'">Download Progress: <span x-text="downloadPercent"></span>%</div>
+              <div class="font-medium text-sm text-gray-600 font-medium" x-show="status == 'installing'">Installing...</div>
+              <div class="font-medium text-sm text-gray-600 font-medium" x-show="status == 'removing'">Removing...</div>
+            </div>
           </div>
-          
-          <button x-show="status == 'uninstalled'" class="cursor-pointer mt-4 border rounded-full px-3 py-1" @click="download">Download</button>
-          <button x-show="status == 'installed'" class="cursor-pointer mt-4 border rounded-full px-3 py-1" @click="remove">Remove</button>
-          <div class="font-mediumn text-sm" x-show="downloadPercent != 0">Download Progress: <span x-text="downloadPercent"></span>%</div>
+        </template>
       </div>
     </main>
     <script src="renderer.js"></script>

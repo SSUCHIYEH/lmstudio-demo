@@ -21,6 +21,14 @@ const SOFTWARE_CONFIG = {
     localAppPath: 'AnythingLLM',
     programFilesPath: 'AnythingLLM',
     uninstallerName: 'Uninstall AnythingLLM.exe'
+  },
+  ollama: {
+    name: 'Ollama',
+    url: 'https://ollama.com/download/OllamaSetup.exe',
+    tempFileName: 'Ollama-Setup.exe',
+    localAppPath: 'Ollama',
+    programFilesPath: 'Ollama',
+    uninstallerName: 'Uninstall Ollama.exe'
   }
 };
 

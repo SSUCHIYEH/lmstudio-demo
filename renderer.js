@@ -48,7 +48,7 @@ const ApplicationManager = (params = {}) => ({
     this.status = result ? 'installed' : 'uninstalled';
   },
   async remove() {
-    this.status = 'removeing';
+    this.status = 'removing';
     const result = await ipcRenderer.invoke('remove', this.name);
     this.status = result ? 'uninstalled' : 'installed';
   },
