@@ -41,10 +41,13 @@ function getSoftwareConfig(softwareType = DEFAULT_SOFTWARE) {
   };
 }
 
-async function downloadFile(url, dest) {
+async function downloadFile(url, dest, onProgress) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`download failed: ${res.status} ${res.statusText}`);
   
+  const total = Number(res.headers.get('content-length')) || 0;
+  let downloaded = 0;
+
   // 確保目標目錄存在
   const destDir = path.dirname(dest);
   if (!fs.existsSync(destDir)) {
@@ -53,6 +56,12 @@ async function downloadFile(url, dest) {
   
   return new Promise((resolve, reject) => {
     const fileStream = fs.createWriteStream(dest);
+    res.body.on('data', chunk => {
+      downloaded += chunk.length;
+      if (onProgress && total) {
+        onProgress(downloaded, total);
+      }
+    });
     res.body.pipe(fileStream);
     res.body.on('error', reject);
     fileStream.on('finish', resolve);
@@ -76,16 +85,15 @@ function runCommand(cmd) {
   });
 }
 
-async function downloadAndInstall(softwareType = DEFAULT_SOFTWARE) {
+async function downloadAndInstall(softwareType = DEFAULT_SOFTWARE, onProgress) {
   try {
     const config = getSoftwareConfig(softwareType);
     
     console.log(`start download ${config.name}...`);
-    console.log(`Temp file exists: ${fs.existsSync(config.tempExePath)}`);
     
     // 下載 EXE 安裝檔
     if (!fs.existsSync(config.tempExePath)) {
-      await downloadFile(config.url, config.tempExePath);
+      await downloadFile(config.url, config.tempExePath , onProgress);
       console.log('download complete');
     } else {
       console.log('installer already exists, skipping download');
@@ -150,7 +158,7 @@ async function remove(softwareType = DEFAULT_SOFTWARE) {
     
     return true;
   } catch (err) {
-    console.error('移除失敗:', err);
+    console.error('remove fail:', err);
     return false;
   }
 }

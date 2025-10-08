@@ -4,8 +4,8 @@ const lmstudio = require('./lmstudio');
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 400,
-    height: 300,
+    width: 1200,
+    height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'renderer.js'),
       nodeIntegration: true,
@@ -18,14 +18,21 @@ function createWindow() {
 
 app.whenReady().then(createWindow);
 
-ipcMain.handle('download-install', async () => {
-  return await lmstudio.downloadAndInstall();
+ipcMain.handle('download-install', async (_event, name) => {
+  const win = BrowserWindow.getFocusedWindow();
+  return await lmstudio.downloadAndInstall(name, (downloaded, total) => {
+    win.webContents.send(`${name}-download-progress`, {
+      downloaded,
+      total,
+      percent: total ? Math.round((downloaded / total) * 100) : 0
+    });
+  });
 });
 
-ipcMain.handle('remove', async () => {
-  return await lmstudio.remove();
+ipcMain.handle('remove', async (_event, name) => {
+  return await lmstudio.remove(name);
 });
 
-ipcMain.handle('status', async () => {
-  return await lmstudio.status();
+ipcMain.handle('status', async (_event, name) => {
+  return await lmstudio.status(name);
 });
