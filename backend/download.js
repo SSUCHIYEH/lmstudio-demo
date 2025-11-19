@@ -3,66 +3,20 @@ const path = require('path');
 const os = require('os');
 const { exec } = require('child_process');
 const fetch = require('node-fetch');
+const unzipper = require('unzipper');
 
 // 軟體配置設定
-const SOFTWARE_CONFIG = {
-  lmstudio: {
-    name: 'LM Studio',
-    url: 'https://installers.lmstudio.ai/win32/x64/0.3.28-2/LM-Studio-0.3.28-2-x64.exe',
-    tempFileName: 'LMStudio-Setup.exe',
-    localAppPath: 'LM Studio',
-    programFilesPath: 'LM Studio',
-    uninstallerName: 'Uninstall LM Studio.exe'
-  },
-  anythingllm: {
-    name: 'AnythingLLM',
-    url: 'https://cdn.anythingllm.com/latest/AnythingLLMDesktop.exe',
-    tempFileName: 'AnythingLLM-Setup.exe',
-    localAppPath: 'AnythingLLM',
-    programFilesPath: 'AnythingLLM',
-    uninstallerName: 'Uninstall AnythingLLM.exe'
-  },
-  ollama: {
-    name: 'Ollama',
-    url: 'https://ollama.com/download/OllamaSetup.exe',
-    tempFileName: 'Ollama-Setup.exe',
-    localAppPath: 'Ollama',
-    programFilesPath: 'Ollama',
-    uninstallerName: 'Uninstall Ollama.exe'
-  },
-  buzzwhisper: {
-    name: 'Buzz Whisper',
-    url: 'https://sourceforge.net/projects/buzz-captions/files/Buzz-1.3.3-Windows-X64.zip/download',
-    tempZipName: 'Buzz-Setup.zip',
-    tempFileName: 'Buzz-Setup.exe',
-    localAppPath: 'Buzz',
-    programFilesPath: 'Buzz',
-    uninstallerName: 'Uninstall Buzz Whisper.exe',
-  }
+const config = {
+  name: 'Buzz Whisper',
+  url: 'https://sourceforge.net/projects/buzz-captions/files/Buzz-1.3.3-Windows-X64.zip/download',
+  tempZipName: 'Buzz-Setup.zip',
+  tempFileName: 'Buzz-Setup.exe',
+  localAppPath: path.join(process.env.LOCALAPPDATA || 'C:\\Users\\' + os.userInfo().username + '\\AppData\\Local', 'Programs', 'Buzz'),
+  programFilesPath: path.join(process.env.ProgramFiles || 'C:\\Program Files', 'Buzz'),
+  uninstallerName: 'Uninstall Buzz Whisper.exe',
+  get tempZipPath() { return path.join(os.tmpdir(), this.tempZipName); },
+  get tempExePath() { return path.join(os.tmpdir(), this.tempFileName); }
 };
-
-// 預設軟體 (可修改為 'lmstudio' 或 'anythingllm')
-const DEFAULT_SOFTWARE = 'anythingllm';
-
-function getSoftwareConfig(softwareType = DEFAULT_SOFTWARE) {
-  const config = SOFTWARE_CONFIG[softwareType];
-  if (!config) {
-    throw new Error(`Unsupported software type: ${softwareType}`);
-  }
-
-  const result = {
-    ...config,
-    tempExePath: path.join(os.tmpdir(), config.tempFileName),
-    localAppPath: path.join(process.env.LOCALAPPDATA || 'C:\\Users\\' + os.userInfo().username + '\\AppData\\Local', 'Programs', config.localAppPath),
-    programFilesPath: path.join(process.env.ProgramFiles || 'C:\\Program Files', config.programFilesPath)
-  }
-
-  if (config.tempZipName) {
-    result.tempZipPath = path.join(os.tmpdir(), config.tempZipName);
-  }
-
-  return result;
-}
 
 async function downloadFile(url, dest, onProgress) {
   const res = await fetch(url);
@@ -108,49 +62,15 @@ function runCommand(cmd) {
   });
 }
 
-// 下載安裝檔並安裝軟體
-async function downloadAndInstall(softwareType = DEFAULT_SOFTWARE, onProgress) {
-  try {
-    const config = getSoftwareConfig(softwareType);
-    
-    console.log(`start download ${config.name}...`);
-    
-    // 下載 EXE 安裝檔
-    if (!fs.existsSync(config.tempExePath)) {
-      await downloadFile(config.url, config.tempExePath , onProgress);
-      console.log('download complete');
-    } else {
-      console.log('installer already exists, skipping download');
-    }
-
-    console.log(`start install ${config.name}...`);
-    
-    // 執行 Windows 靜默安裝
-    await runCommand(`"${config.tempExePath}" /S /D="${config.localAppPath}"`);
-
-    console.log('install complete');
-    
-    // 清理臨時檔案
-    if (fs.existsSync(config.tempExePath)) {
-      fs.unlinkSync(config.tempExePath);
-      console.log('clean up temp files complete');
-    }
-    
-    return true;
-  } catch (err) {
-    console.error('install failed:', err);
-    return false;
-  }
-}
-
-async function downloadZipAndUnzip(config, onProgress) {
+async function downloadZipAndUnzip(onProgress) {
   try {
     console.log(`start download buzz whisper...`);
+    const tempZipPath = path.join(os.tmpdir(), 'buzz', config.tempZipName);
     if (!fs.existsSync(tempZipPath)) {
-      await downloadFile(config.url, config.tempZipPath, onProgress);
+      await downloadFile(config.url, tempZipPath, onProgress);
       console.log('download complete');
       // 解壓縮 zip 檔到 tmp/buzz
-      await fs.createReadStream(config.tempZipPath)
+      await fs.createReadStream(tempZipPath)
               .pipe(unzipper.Extract({ path: path.join(os.tmpdir(), 'buzz') }))
               .promise();
       console.log('unzip complete');
@@ -162,7 +82,7 @@ async function downloadZipAndUnzip(config, onProgress) {
   }
 }
 
-async function downloadZipInstall(softwareType = DEFAULT_SOFTWARE, onProgress) {
+async function downloadAndInstall(onProgress) {
   try {
     // 下載ZIP並解壓縮
     await downloadZipAndUnzip(onProgress);
@@ -189,7 +109,6 @@ async function downloadZipInstall(softwareType = DEFAULT_SOFTWARE, onProgress) {
     return false;
   }
 }
-
 
 async function remove(softwareType = DEFAULT_SOFTWARE) {
   try {
@@ -258,4 +177,4 @@ async function status(softwareType = DEFAULT_SOFTWARE) {
   return false;
 }
 
-module.exports = { downloadAndInstall, remove, status, downloadZipInstall };
+module.exports = { downloadAndInstall, remove, status };

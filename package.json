@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "node-fetch": "^2.7.0",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "systeminformation": "^5.27.11"
   }
 }

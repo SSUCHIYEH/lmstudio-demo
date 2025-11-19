@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AI Application Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  </head>
+  <body>
+    <main x-data="hardwareChecker">
+      <button @click="checkHardware()">自我檢測</button>
+    </main>
+    <script src="./alpine/hardwareChecker.js"></script>
+  </body>
+</html> 
