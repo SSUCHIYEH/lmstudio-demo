@@ -46,6 +46,14 @@
             x-data="{
               applications: [
               {
+                name: 'lmstudio',
+                displayName: 'LM Studio',
+                description: 'Run local AI models like gpt-oss, Qwen, Gemma, DeepSeek and many more on your computer, privately and for free.',
+                icon: './icons/lmstudio.png',
+                downloadType: 'exe'
+              }],
+              applicationss: [
+              {
                 name: 'anythingllm',
                 displayName: 'AnythingLLM',
                 icon: './icons/anythingllm.png',
@@ -95,12 +103,32 @@
                     </div>
                   </div>
 
-                  <div  class="flex justify-end">
+                  <div class="flex justify-end">
                     <button x-show="status == 'uninstalled'" class="cursor-pointer mt-4 rounded-md px-3 py-2 bg-gray-700 hover:bg-gray-700/80 text-sm text-white" @click="download(app.downloadType)">Download</button>
                     <button x-show="status == 'installed'" class="cursor-pointer mt-4 rounded-md px-3 py-2 bg-gray-500 hover:bg-gray-500/80 text-sm text-white" @click="remove">Remove</button>
                     <div class="font-medium text-sm text-gray-600 font-medium" x-show="downloadPercent != 0 && status != 'installing'">Download Progress: <span x-text="downloadPercent"></span>%</div>
                     <div class="font-medium text-sm text-gray-600 font-medium" x-show="status == 'installing'">Installing...</div>
                     <div class="font-medium text-sm text-gray-600 font-medium" x-show="status == 'removing'">Removing...</div>
+                  </div>
+
+                  <!-- download modal -->
+                  <div :class="{'!flex': status == 'downloading'}" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center h-screen w-full md:inset-0 bg-black/30">
+                    <div class="relative bg-white rounded-xl shadow-md p-8 w-112">
+                      <div class="flex gap-4">
+                        <img :src="app.icon" class="size-12" :alt="app.name" />
+                        <p>Asus AI Hub</p>
+                      </div>
+                      <div class="mt-6">
+                        Downloading...
+                      </div>
+                      <div class="flex justify-between mt-6 text-sm">
+                        <p><span x-text="app.name"></span> Version 1.0.0</p>
+                        <p class="text-[#00B8DB]"><span x-text="downloadPercent"></span>%</p>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-2 mt-6">
+                        <div class="bg-[#00B8DB] h-2 rounded-full transition-all duration-300" :style="`width: ${parseInt(downloadPercent)}%`"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </template>
@@ -110,6 +138,5 @@
       </section>
     </main>
     <script src="renderer.js"></script>
-    <script src="./alpine/applicationManager.js"></script>
   </body>
 </html> 
