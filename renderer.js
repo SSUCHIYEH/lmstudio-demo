@@ -9,7 +9,7 @@ const ApplicationManager = (params = {}) => ({
     const result = await ipcRenderer.invoke('status', this.name);
     this.status = result ? 'installed' : 'uninstalled';
   },
-  async download() {
+  async download(type) {
     this.status = 'downloading';
     // 監聽進度事件
     ipcRenderer.on(`${this.name}-download-progress`, (event, data) => {
@@ -18,9 +18,16 @@ const ApplicationManager = (params = {}) => ({
         this.status = 'installing';
       }
     });
-    const result = await ipcRenderer.invoke('download-install', this.name);
+
+    if (type === 'zip') {
+      const result = await ipcRenderer.invoke('zip-download-install', this.name);
+      this.status = result ? 'installed' : 'uninstalled';
+    }
+    else {    
+      const result = await ipcRenderer.invoke('download-install', this.name);
+      this.status = result ? 'installed' : 'uninstalled';
+    }
     this.downloadPercent = 0;
-    this.status = result ? 'installed' : 'uninstalled';
   },
   async remove() {
     this.status = 'removing';
