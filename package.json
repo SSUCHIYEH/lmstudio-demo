@@ -1,13 +1,28 @@
 {
-  "name": "lmstudio-demo",
+  "name": "Asus AI Hub",
+  "productName": "Asus AI Hub",
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "dev": "nodemon --exec electron ."
   },
+  "build": {
+    "appId": "com.5xruby.asus-ai-hub",
+    "productName": "Asus AI Hub",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      "icon": "build/icon.ico"
+    }
+  },
   "devDependencies": {
     "electron": "^26.2.0",
+    "electron-builder": "^26.0.12",
     "tailwindcss": "^4.1.14"
   },
   "dependencies": {

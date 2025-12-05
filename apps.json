@@ -1,0 +1,51 @@
+[ {
+    "name": "buzz",
+    "displayName": "Buzz Whisper",
+    "type": "Audio",
+    "icon": "./assets/apps/buzz.png",
+    "downloadType": "zip",
+    "description": "Buzz Whisper 是一款先進的語音辨識和轉錄工具，採用最新的 Whisper AI 模型，提供高精度的多語言語音轉文字服務。支援即時轉錄、批次處理和多種音訊格式。",
+    "version": "2.5.0",
+    "size": "245MB",
+    "publisher": "OpenAI Community",
+    "releaseDate": "2024-03-15",
+    "requirements": [
+      "作業系統: Windows 10/11 或 macOS 12+",
+      "記憶體: 至少 8GB RAM",
+      "處理器: Intel i5 或 AMD Ryzen 5 以上",
+      "GPU: NVIDIA GPU (建議使用 CUDA 支援)"
+    ],
+    "features": [
+      "支援 99+ 種語言的語音辨識",
+      "即時轉錄與批次處理",
+      "自動標點符號和格式化",
+      "匯出為 TXT、SRT、VTT 等格式",
+      "離線處理保護隱私"
+    ]
+  },
+  {
+    "name": "lmstudio",
+    "displayName": "LM Studio",
+    "type": "AI Chat",
+    "icon": "./assets/apps/lmstudio.png",
+    "downloadType": "exe",
+    "description": "Run local AI models like gpt-oss, Qwen, Gemma, DeepSeek and many more on your computer, privately and for free.",
+    "version": "0.3.28",
+    "size": "320MB",
+    "publisher": "LM Studio",
+    "publish_date": "2024-02-20",
+    "requirements": [
+      "作業系統: Windows 10/11 或 macOS 12+",
+      "記憶體: 至少 8GB RAM",
+      "處理器: Intel i5 或 AMD Ryzen 5 以上",
+      "GPU: NVIDIA GPU (建議使用 CUDA 支援)"
+    ],
+    "features": [
+      "支援 99+ 種語言的語音辨識",
+      "即時轉錄與批次處理",
+      "自動標點符號和格式化",
+      "匯出為 TXT、SRT、VTT 等格式",
+      "離線處理保護隱私"
+    ]
+  }
+]

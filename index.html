@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>AI Application Manager</title>
+    <title>Asus AI Hub</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   </head>
-  <body>
-    <main class="flex">
-      <section class="w-[8vw] pt-8 h-screen bg-gradient-to-b from-[#2B7FFF] via-[#51A2FF] to-[#00D3F2]">
+  <body class="overflow-hidden rounded-lg">
+    <main class="flex min-h-screen">
+      <section class="w-[8vw] pt-8 bg-gradient-to-b from-[#2B7FFF] via-[#51A2FF] to-[#00D3F2] rounded-bl-lg">
         <div class="flex flex-col gap-y-6 mx-auto">
           <a href="./index.html" class="flex items-center justify-center rounded-[10px] size-12 mx-auto p-3 bg-white/30 shadow-md">
             <img src="./assets/sidebar/home.svg" class="size-6" alt="ASUS Logo" />
@@ -21,95 +20,229 @@
         </div>
       </section>
 
-      <section class="flex-1">
-        <header class="border-b border-[#F3F4F6] py-3 px-6 text-[#1E2939] text-2xl">Asus AI Hub</header>
+      <section class="flex-1 rounded-br-lg overflow-hidden">
+        <header x-data="TitleBar()" class="flex items-center justify-between border-b border-[#F3F4F6] py-3 px-6 text-[#1E2939]"
+          style="-webkit-app-region: drag;">
+          <div class="flex items-center gap-x-4">
+            <img src="./assets/icons/logo.svg" class="size-10" />
+            <p class="text-2xl font-medium text-gray-700">
+              Asus AI Hub
+            </p>
+          </div>
+          <div class="flex items-center gap-2" style="-webkit-app-region: no-drag;">
+            <button class="hover:bg-gray-200 rounded focus:outline-none">
+              <img src="./assets/icons/qa.svg" class="size-9" />
+            </button>
+            <button @click="maximizeWindow()" class="hover:bg-gray-200 rounded focus:outline-none">
+              <img src="./assets/icons/zoom-in.svg" class="size-9" />
+            </button>
+            <button @click="closeWindow()" class="hover:bg-gray-200 rounded focus:outline-none">
+              <img src="./assets/icons/close.svg" class="size-9" />
+            </button>
+          </div>
+        </header>
+
+        <div class="flex items-center gap-x-2 py-3 px-6 border-b border-[#F3F4F6]">
+          <div class="size-3 bg-[#00C950] rounded-full"></div>
+          <p class="text-[#333333]">Server Connection</p>
+        </div>
         
-        <div class="px-8">
-          <form class="pt-6">
-            <div class="flex gap-x-4">
-              <div class="flex-1">
-                <input type="text" id="name" class="rounded-md block w-full px-3 py-2.5  text-[#717182] bg-[#F3F3F5] text-sm shadow-xs placeholder:text-[#99A1AF] focus:ring-0 focus:border-none focus:outline-none" placeholder="Search AI tools..." />
-              </div>
-              <div class="w-48">
-                <select id="type" class="rounded-md block w-full px-3 py-2.5  text-[#717182] bg-[#F3F3F5] text-sm shadow-xs placeholder:text-[#99A1AF] focus:ring-0 focus:border-none focus:outline-none">
-                  <option selected>All Types</option>
-                  <option value="aduio">Aduio</option>
-                  <option value="chat">AI Chat</option>
-                  <option value="video">Video</option>
-                  <option value="document">Document</option>
-                </select>
+        <div class="px-8"
+          x-data="{
+            dropdownOpen: false,
+            type: 'All Types',
+            search: '',
+            types: ['All Types', 'Audio', 'AI Chat', 'Video', 'Document'],
+            applications: [],
+            allApps: [],
+            async init() {
+              const response = await fetch('./apps.json');
+              this.allApps = await response.json();
+              this.applications = this.allApps
+            },
+            selectType(value) {
+              this.dropdownOpen = false
+              this.type = value
+              this.filter();
+            },
+            filter() {
+              console.log('filter')
+              if(this.type !== 'All Types') {
+                this.applications = this.allApps.filter(app => app.type === this.type);
+              } else {
+                this.applications = this.allApps;
+              }
+
+              if(this.search.replaceAll(' ', '') !== '' && this.search.replaceAll(' ', '').length >= 2) {
+                this.applications = this.applications.filter(app => app.displayName.toLowerCase().includes(this.search.replaceAll(' ', '').toLowerCase()));
+              }
+            }
+          }">
+          <div class="flex gap-x-4 pt-6">
+            <div class="flex-1 flex items-center gap-x-1.5 px-3 border border-[#2B7FFF]/25 rounded-md">
+              <img src="./assets/icons/search.svg" class="size-6" />
+              <input type="text"
+                x-model="search"
+                class="block w-full h-full py-2.5 text-[#717182] text-sm shadow-xs placeholder:text-[#99A1AF] focus:ring-0 focus:border-none focus:outline-none"
+                placeholder="Search AI tools..."
+                @input.debounce.500ms="filter" />
+            </div>
+
+            <div class="relative w-48" >
+              <button @click="dropdownOpen = !dropdownOpen"
+                class="flex items-center border border-[#2B7FFF]/25 w-full pl-4 pr-3 py-3 rounded-sm"
+                :class="{'!border-[#2B7FFF]': dropdownOpen}"
+                type="button">
+                <span x-text="type"></span>
+              </button>
+
+              <!-- Dropdown menu -->
+              <div x-show="dropdownOpen" class="absolute top-13 left-0 border border-gray-200 rounded-base shadow-lg w-full">
+                <ul class="py-2">
+                  <template x-for="t in types" :key="t">
+                    <li @click="selectType(t)" x-text="t" class="px-4 py-3 leading-6 hover:bg-[#2B7FFF]/4 active:bg-[#2B7FFF]/12" @click="type = t; open = false"></li>
+                  </template>
+                </ul>
               </div>
             </div>
-          </form>
+          </div>
 
-          <div class="pt-8"
-            x-data="{
-              applications: [
-              {
-                name: 'anythingllm',
-                displayName: 'AnythingLLM',
-                icon: './icons/anythingllm.png',
-                description: 'Everything great about AI in one desktop application.',
-                downloadType: 'exe'
-              },
-              {
-                name: 'lmstudio',
-                displayName: 'LM Studio',
-                description: 'Run local AI models like gpt-oss, Qwen, Gemma, DeepSeek and many more on your computer, privately and for free.',
-                icon: './icons/lmstudio.png',
-                downloadType: 'exe'
-              },
-              {
-                name: 'ollama',
-                displayName: 'Ollama',
-                description: 'Chat & build with open models.',
-                icon: './icons/ollama.png',
-                downloadType: 'exe'
-              },
-              {
-                name: 'buzz',
-                displayName: 'Buzz Whisper',
-                description: 'Transcribe and translate audio offline on your personal computer.',
-                icon: './icons/buzz.png',
-                downloadType: 'zip'
-              }]
-            }"
-          >
-            <div class="grid grid-cols-2 gap-4 w-full">
-              <template x-for="app in applications" :key="app.name">
-                <div class="flex flex-col justify-between border-gray-300 shadow-md rounded-md p-4 bg-white"
-                  x-data="ApplicationManager({name: app.name})">
-                  <div class="grid grid-cols-5 gap-4">
-                    <div class="col-span-1">
-                      <img :src="app.icon" class="w-full h-auto" :alt="app.name" />
-                    </div>
-                    <div class="col-span-3">
-                      <h3 class="font-bold" x-text="app.displayName"></h3>
-                      <p class="mt-2 text-sm text-gray-700" x-text="app.description"></p>
-                    </div>
-                    <div class="col-span-1 flex justify-end">
-                    <p  x-show="status == 'installed'"
-                        class="rounded-ms h-fit px-2 py-1 text-xs font-semibold uppercase"
-                        x-text="status"
-                        :class="{'bg-green-100 text-green-600': status === 'installed'}"></p>
-                    </div>
-                  </div>
+          <div class="grid grid-cols-4 gap-4 pt-8 w-full">
+            <template x-for="app in applications" :key="app.name">
+              <div class="shadow-[0px_3px_4px_rgba(0,0,0,0.2)] rounded-2xl" x-data="ApplicationManager({name: app.name})">
+                <div @click="infoModalOpen = true" class="relative cursor-pointer flex items-center justify-center rounded-t-2xl py-6 bg-gradient-to-b from-[#DBEAFF] to-[#C5E1FF]">
+                  <img :src="app.icon" class="rounded-2xl size-25" :alt="app.name" />
+                  <img src="./assets/icons/installed.svg" class="absolute top-2 right-0 size-12" />
+                </div>
+                <div class="p-3">
+                  <h6 class="font-medium text-lg leading-7.75" x-text="app.name"></h6>
+                  <p class="text-[#545860] leading-6" x-text="app.type"></p>
+                  <div class="flex gap-x-2.5">
+                    <button :class="{'!flex': status == 'uninstalled'}" class="hidden justify-center items-center cursor-pointer rounded-md w-full mt-4 px-3 py-2 bg-[#2B7FFF] hover:bg-[#2B7FFF]/25 text-sm text-white" @click="download(app.downloadType)">
+                      <img src="./assets/icons/download.svg" class="size-4.5" />
+                    </button>
 
-                  <div  class="flex justify-end">
-                    <button x-show="status == 'uninstalled'" class="cursor-pointer mt-4 rounded-md px-3 py-2 bg-gray-700 hover:bg-gray-700/80 text-sm text-white" @click="download(app.downloadType)">Download</button>
-                    <button x-show="status == 'installed'" class="cursor-pointer mt-4 rounded-md px-3 py-2 bg-gray-500 hover:bg-gray-500/80 text-sm text-white" @click="remove">Remove</button>
-                    <div class="font-medium text-sm text-gray-600 font-medium" x-show="downloadPercent != 0 && status != 'installing'">Download Progress: <span x-text="downloadPercent"></span>%</div>
-                    <div class="font-medium text-sm text-gray-600 font-medium" x-show="status == 'installing'">Installing...</div>
-                    <div class="font-medium text-sm text-gray-600 font-medium" x-show="status == 'removing'">Removing...</div>
+                    <button :class="{'!flex': status == 'installed'}" class="hidden justify-center items-center cursor-pointer rounded-md flex-1 mt-4 px-3 py-2 bg-[#2B7FFF] hover:bg-[#2B7FFF]/25 text-sm text-white" @click="download(app.downloadType)">
+                      <img src="./assets/icons/link.svg" class="size-4.5" />
+                    </button>
+
+                    <button :class="{'!flex': status == 'installed'}" class="hidden justify-center items-center cursor-pointer rounded-md flex-1 mt-4 px-3 py-2 bg-[#00B8DB] hover:bg-[#00B8DB]/25 text-sm text-white" @click="remove">
+                      <img src="./assets/icons/trash.svg" class="size-4.5" />
+                    </button>
                   </div>
                 </div>
-              </template>
-            </div>
+
+                <div class="hidden justify-end">
+                  <button x-show="status == 'uninstalled'" class="cursor-pointer mt-4 rounded-md px-3 py-2 bg-gray-700 hover:bg-gray-700/80 text-sm text-white" @click="download(app.downloadType)">Download</button>
+                  <button x-show="status == 'installed'" class="cursor-pointer mt-4 rounded-md px-3 py-2 bg-gray-500 hover:bg-gray-500/80 text-sm text-white" @click="remove">Remove</button>
+                  <div class="font-medium text-sm text-gray-600 font-medium" x-show="downloadPercent != 0 && status != 'installing'">Download Progress: <span x-text="downloadPercent"></span>%</div>
+                  <div class="font-medium text-sm text-gray-600 font-medium" x-show="status == 'installing'">Installing...</div>
+                  <div class="font-medium text-sm text-gray-600 font-medium" x-show="status == 'removing'">Removing...</div>
+                </div>
+
+                <!-- Info Modal -->
+                <div :class="{'!flex': infoModalOpen }" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center h-screen w-full md:inset-0 bg-black/30">
+                  <div class="relative bg-white rounded-2xl shadow-[0px_3px_4px_rgba(0,0,0,0.2)] w-162.5 h-120 pb-6 overflow-y-auto">
+                    <div class="flex justify-center items-center rounded-t-2xl py-6 bg-gradient-to-r from-[#2B7FFF] via-[#51A2FF] to-[#00D3F2]">
+                      <img :src="app.icon" class="rounded-2xl size-25" />
+                      <img src="./assets/icons/close-with-bg.svg" class="absolute top-2 right-2 size-7 cursor-pointer" @click.stop="infoModalOpen = false" />
+                    </div>
+                    <div class="p-6">
+                      <p class="font-medium text-lg" x-text="app.displayName"></p>
+                      <div class="flex gap-x-4 mt-2 text-[#656A70]">
+                        <div class="flex gap-x-1">
+                          <img src="./assets/icons/type.svg"/>
+                          <p x-text="app.type"></p>
+                        </div>
+                        <div class="flex gap-x-1">
+                          <img src="./assets/icons/version.svg"/>
+                          <p x-text="app.version"></p>
+                        </div>
+                        <div class="flex gap-x-1">
+                          <img src="./assets/icons/disk.svg"/>
+                          <p x-text="app.size"></p>
+                        </div>
+                      </div>
+                      <div class="mt-6">
+                        <p class="font-medium text-lg">關於此工具</p>
+                        <p class="mt-2 text-[#333333]" x-text="app.description"></p>
+                      </div>
+                      <div class="flex gap-x-4 mt-6">
+                        <div class="flex-1 rounded-2xl px-6 py-4 bg-[#F4F9FF]">
+                          <div class="flex items-center gap-x-1">
+                            <img src="./assets/icons/shield.svg" class="size-6" />
+                            <p>發行者</p>
+                          </div>
+                          <p class="text-[#545860]" x-text="app.publisher"></p>
+                        </div>
+                        <div class="flex-1 rounded-2xl px-6 py-4 bg-[#E6FAFD]">
+                          <div class="flex items-center gap-x-1">
+                            <img src="./assets/icons/calendar.svg" class="size-6" />
+                            <p>發行日期</p>
+                          </div>
+                          <p class="text-[#545860]" x-text="app.releaseDate"></p>
+                        </div>
+                      </div>
+                      <div class="mt-6">
+                        <p class="font-medium text-lg">系統需求</p>
+                        <ul class="mt-2 text-[#333333]">
+                          <template x-for="req in app.requirements" :key="req">
+                            <li class="list-disc ml-6" x-text="req"></li>
+                          </template>
+                        </ul>
+                      </div>
+                      <div class="mt-6">
+                        <p class="font-medium text-lg">主要功能</p>
+                        <div class="flex flex-col gap-y-2 mt-2">
+                          <template x-for="fea in app.features" :key="fea">
+                            <div class="flex items-center gap-x-2 py-1 px-2 bg-[#F4F9FF]">
+                              <img src="./assets/icons/list-circle.svg" class="size-2" />
+                              <p x-text="fea"></p>
+                            </div>
+                          </template>
+                        </div>
+                      </div>
+                      <div x-show="status == 'installed'" class="mt-6">
+                        <button class="flex justify-center items-center cursor-pointer rounded-md flex-1 mt-4 px-3 py-2 bg-[#2B7FFF] hover:bg-[#2B7FFF]/25 text-sm text-white" @click="execute">
+                          <img src="./assets/icons/link.svg" class="size-4.5" />
+                        </button>
+
+                        <button class="flex justify-center items-center cursor-pointer rounded-md flex-1 mt-4 px-3 py-2 bg-[#00B8DB] hover:bg-[#00B8DB]/25 text-sm text-white" @click="remove">
+                          <img src="./assets/icons/trash.svg" class="size-4.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- download modal -->
+                <div :class="{'!flex': status == 'downloading'}" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center h-screen w-full md:inset-0 bg-black/30">
+                  <div class="relative bg-white rounded-2xl shadow-md p-8 w-112">
+                    <div class="flex gap-4">
+                      <img :src="app.icon" class="size-12" :alt="app.name" />
+                      <p>Asus AI Hub</p>
+                    </div>
+                    <div class="mt-6">
+                      Downloading...
+                    </div>
+                    <div class="flex justify-between mt-6 text-sm">
+                      <p><span x-text="app.name"></span> Version 1.0.0</p>
+                      <p class="text-[#00B8DB]"><span x-text="downloadPercent"></span>%</p>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mt-6">
+                      <div class="bg-[#00B8DB] h-2 rounded-full transition-all duration-300" :style="`width: ${parseInt(downloadPercent)}%`"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
       </section>
-    </main>
+    </main>    
     <script src="renderer.js"></script>
+    <script src="./alpine/titleBar.js"></script>
     <script src="./alpine/applicationManager.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   </body>
 </html> 
