@@ -82,7 +82,7 @@ async function downloadZipAndUnzip(onProgress) {
   }
 }
 
-async function exeDownloadAndInstall(onProgress) {
+async function downloadExe(onProgress) {
   try {
     // 下載ZIP並解壓縮
     await downloadZipAndUnzip(onProgress);
@@ -177,4 +177,4 @@ async function status(softwareType = DEFAULT_SOFTWARE) {
   return false;
 }
 
-module.exports = { exeDownloadAndInstall, remove, status, downloadZipAndUnzip };
+module.exports = { downloadExe, remove, status, downloadZipAndUnzip };

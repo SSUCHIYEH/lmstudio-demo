@@ -1,24 +1,40 @@
 {
-  "name": "Asus AI Hub",
+  "name": "asus-ai-hub",
   "productName": "Asus AI Hub",
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "nodemon --exec electron ."
+    "dev": "nodemon --exec electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "dist": "electron-builder --win --x64"
   },
   "build": {
-    "appId": "com.5xruby.asus-ai-hub",
+    "appId": "com.5xruby.asusaihub",
     "productName": "Asus AI Hub",
     "directories": {
       "output": "dist"
     },
-    "files": [
-      "**/*"
-    ],
     "win": {
-      "icon": "build/icon.ico"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "signAndEditExecutable": false
     }
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Asus AI Hub",
+    "installerIcon": "assets/icon.ico",
+    "uninstallerIcon": "assets/icon.ico"
   },
   "devDependencies": {
     "electron": "^26.2.0",

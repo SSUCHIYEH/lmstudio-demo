@@ -38,7 +38,7 @@ const SOFTWARE_CONFIG = {
     tempFileName: 'Buzz-1.3.3-windows.exe',
     localAppPath: 'Buzz',
     programFilesPath: 'Buzz',
-    uninstallerName: 'Uninstall Buzz Whisper.exe',
+    uninstallerName: 'unins000.exe',
     folder: 'Buzz'
   }
 };
@@ -112,7 +112,7 @@ function runCommand(cmd) {
 }
 
 // 下載安裝檔並安裝軟體
-async function exeDownloadAndInstall(softwareType = DEFAULT_SOFTWARE, onProgress) {
+async function downloadExe(softwareType = DEFAULT_SOFTWARE, onProgress) {
   try {
     const config = getSoftwareConfig(softwareType);
     
@@ -124,19 +124,6 @@ async function exeDownloadAndInstall(softwareType = DEFAULT_SOFTWARE, onProgress
       console.log('download complete');
     } else {
       console.log('installer already exists, skipping download');
-    }
-
-    console.log(`start install ${config.name}...`);
-    
-    // 執行 Windows 靜默安裝
-    await runCommand(`"${config.tempExePath}" /S /D="${config.localAppPath}"`);
-
-    console.log('install complete');
-    
-    // 清理臨時檔案
-    if (fs.existsSync(config.tempExePath)) {
-      fs.unlinkSync(config.tempExePath);
-      console.log('clean up temp files complete');
     }
     
     return true;
@@ -158,6 +145,7 @@ async function downloadZipAndUnzip(config, onProgress) {
               .pipe(unzipper.Extract({ path: path.join(os.tmpdir(), config.folder) }))
               .promise();
       console.log('unzip complete');
+      return true
     } else {
       console.log('zip file already exists, skipping download');
       console.log(config.tempExePath)
@@ -171,19 +159,32 @@ async function downloadZipAndUnzip(config, onProgress) {
       } else {
         console.log('alreadyd unzip');
       }
+      return true
     }
   } catch (err) {
     console.error('download and unzip failed:', err);
+    return false
   }
 }
 
-async function zipDownloadAndInstall(softwareType = DEFAULT_SOFTWARE, onProgress) {
+async function downloadZip(softwareType = DEFAULT_SOFTWARE, onProgress) {
   try {
     const config = getSoftwareConfig(softwareType);
     
     // 下載ZIP並解壓縮
-    await downloadZipAndUnzip(config, onProgress);
+    const resp = await downloadZipAndUnzip(config, onProgress);
     console.log(`start install ${config.name}...`);
+    
+    return resp;
+  } catch (err) {
+    console.error('install failed:', err);
+    return false;
+  }
+}
+
+async function install(softwareType = DEFAULT_SOFTWARE) {
+  try {
+    const config = getSoftwareConfig(softwareType);
     // 執行 Windows 靜默安裝
     await runCommand(`"${config.tempExePath}" /S /D="${config.localAppPath}"`);
     console.log('install complete');
@@ -206,12 +207,34 @@ async function zipDownloadAndInstall(softwareType = DEFAULT_SOFTWARE, onProgress
   }
 }
 
+async function execute(softwareType = DEFAULT_SOFTWARE) {
+  const config = getSoftwareConfig(softwareType);
+
+  if (fs.existsSync(config.localAppPath)) {
+    const exe = path.join(config.localAppPath, `${config.name}.exe`);
+      
+    if (fs.existsSync(exe)) {
+      await runCommand(`"${exe}" /S`);
+    }
+  }
+}
 
 async function remove(softwareType = DEFAULT_SOFTWARE) {
   try {
     const config = getSoftwareConfig(softwareType);
     
     console.log(`start remove ${config.name}...`);
+
+    // 清理臨時檔案
+    if (fs.existsSync(config.tempZipPath)) {
+      fs.unlinkSync(config.tempZipPath);
+      console.log('clean up temp files complete');
+     }
+
+    if (fs.existsSync(config.tempExePath)) {
+      fs.unlinkSync(config.tempExePath);
+      console.log('clean up temp files complete');
+    }
     
     // 檢查程式是否安裝在 LOCALAPPDATA
     if (fs.existsSync(config.localAppPath)) {
@@ -254,24 +277,25 @@ async function remove(softwareType = DEFAULT_SOFTWARE) {
 async function status(softwareType = DEFAULT_SOFTWARE) {
   const config = getSoftwareConfig(softwareType);
   
-  console.log(`Checking ${config.name} installation status...`);
-  console.log(`LocalApp path: ${config.localAppPath}`);
-  console.log(`Program Files path: ${config.programFilesPath}`);
-  
   // 檢查 LOCALAPPDATA 路徑
   if (fs.existsSync(config.localAppPath) && fs.readdirSync(config.localAppPath).length > 0) {
     console.log(`${config.name} found in LocalApp`);
-    return true;
+    return 'installed';
   }
   
   // 檢查 Program Files 路徑
   if (fs.existsSync(config.programFilesPath) && fs.readdirSync(config.programFilesPath).length > 0) {
     console.log(`${config.name} found in Program Files`);
-    return true;
+    return 'installed';
+  }
+
+  if (fs.existsSync(config.tempExePath) || fs.existsSync(config.tempZipPath)) {
+    console.log(`${config.name} download found`);
+    return 'downloaded';
   }
   
   console.log(`${config.name} not found`);
-  return false;
+  return 'not-downloaded';
 }
 
-module.exports = { exeDownloadAndInstall, remove, status, zipDownloadAndInstall };
+module.exports = { downloadExe, remove, status, downloadZip, install, execute };

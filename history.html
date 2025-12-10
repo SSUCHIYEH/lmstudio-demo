@@ -3,9 +3,6 @@
   <head>
     <title>Asus AI Hub</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
     <style type="text/tailwindcss">
       @layer base {
         body {
@@ -42,12 +39,12 @@
       </div>
     </header>
 
-    <section class=" fixed left-0 top-0 w-[8vw] pt-8 h-full bg-gradient-to-b from-[#2B7FFF] via-[#51A2FF] to-[#00D3F2] rounded-bl-lg">
+    <section class="fixed left-0 top-0 w-[8vw] pt-8 h-full bg-gradient-to-b from-[#2B7FFF] via-[#51A2FF] to-[#00D3F2] rounded-bl-lg">
       <div class="flex flex-col gap-y-6 mx-auto">
-        <a href="./index.html" class="flex items-center justify-center rounded-[10px] size-12 mx-auto p-3 bg-white/38 shadow-md">
+        <a href="./index.html" class="flex items-center justify-center rounded-[10px] size-12 mx-auto p-3 bg-white/10 hover:bg-white/38 shadow-md">
           <img src="./assets/sidebar/home.svg" class="size-6" alt="ASUS Logo" />
         </a>
-        <a href="./history.html" class="flex items-center justify-center rounded-[10px] size-12 mx-auto p-3 bg-white/10 hover:bg-white/38 shadow-md">
+        <a href="./history.html" class="flex items-center justify-center rounded-[10px] size-12 mx-auto p-3 bg-white/38 hover:bg-white/38  shadow-md">
           <img src="./assets/sidebar/installed.svg" class="size-6" alt="ASUS Logo" />
         </a>
         <a href="./asus.html" class="flex items-center justify-center rounded-[10px] size-12 mx-auto p-3 bg-white/10 hover:bg-white/38 shadow-md">
@@ -120,7 +117,9 @@
 
         <div class="grid grid-cols-4 gap-4 pt-8 w-full">
           <template x-for="app in applications" :key="app.name">
-            <div class="shadow-[0px_3px_4px_rgba(0,0,0,0.2)] rounded-2xl" x-data="ApplicationManager({name: app.name})">
+            <div class="shadow-[0px_3px_4px_rgba(0,0,0,0.2)] rounded-2xl"
+              x-data="ApplicationManager({name: app.name})"
+              x-show="status == 'installed'">
               <div @click="infoModalOpen = true" class="relative cursor-pointer flex items-center justify-center rounded-t-2xl py-6 bg-gradient-to-b from-[#DBEAFF] to-[#C5E1FF]">
                 <img :src="app.icon" class="rounded-2xl size-25" :alt="app.name" />
                 <img x-show="status == 'installed'" src="./assets/icons/installed.svg" class="absolute top-2 right-0 size-12" />
@@ -212,14 +211,12 @@
                         </template>
                       </div>
                     </div>
-                    <div x-show="status == 'installed'" class="flex justify-end gap-x-2.5 mt-6">
-                      <button class="flex justify-center items-center gap-2 cursor-pointer rounded-md w-fit mt-4 px-4 py-2.75 bg-[#2B7FFF] hover:bg-[#2B7FFF]/25 text-sm text-white" @click="execute">
-                        <span>開啟工具</span>
+                    <div x-show="status == 'installed'" class="mt-6">
+                      <button class="flex justify-center items-center cursor-pointer rounded-md flex-1 mt-4 px-3 py-2 bg-[#2B7FFF] hover:bg-[#2B7FFF]/25 text-sm text-white" @click="execute">
                         <img src="./assets/icons/link.svg" class="size-4.5" />
                       </button>
 
-                      <button class="flex justify-center items-center gap-2 cursor-pointer rounded-md w-fit mt-4 px-3 py-2 bg-[#00B8DB] hover:bg-[#00B8DB]/25 text-sm text-white" @click="remove">
-                        <span>解除安裝</span>
+                      <button class="flex justify-center items-center cursor-pointer rounded-md flex-1 mt-4 px-3 py-2 bg-[#00B8DB] hover:bg-[#00B8DB]/25 text-sm text-white" @click="remove">
                         <img src="./assets/icons/trash.svg" class="size-4.5" />
                       </button>
                     </div>
@@ -250,7 +247,7 @@
           </template>
         </div>
       </div>
-    </section> 
+    </section>  
     <script src="renderer.js"></script>
     <script src="./alpine/titleBar.js"></script>
     <script src="./alpine/applicationManager.js"></script>
