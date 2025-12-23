@@ -47,5 +47,54 @@
       "匯出為 TXT、SRT、VTT 等格式",
       "離線處理保護隱私"
     ]
+  },
+  {
+    "name": "pdfgear",
+    "displayName": "PDFgear",
+    "type": "PDF",
+    "icon": "./assets/apps/pdfgear.jpg",
+    "downloadType": "exe",
+    "description": "PDFgear 是一款功能強大的 PDF 編輯和管理工具，提供多種實用功能，如 PDF 轉換、合併、分割、註解和簽名等，幫助用戶高效處理各類 PDF 文件。",
+    "version": "2.1.14",
+    "size": "150MB",
+    "publisher": "PDFgear Inc.",
+    "releaseDate": "2024-04-10",
+    "requirements": [
+      "作業系統: Windows 10/11 或 macOS 12+",
+      "記憶體: 至少 4GB RAM",
+      "處理器: Intel i3 或 AMD Ryzen 3 以上"
+    ],
+    "features": [
+      "多功能 PDF 編輯器",
+      "支援 PDF 轉換為 Word、Excel、圖片等格式",
+      "PDF 文件合併與分割",
+      "添加註解、標記和數位簽名",
+      "用戶友好的界面設計"
+    ]
+  },
+  {
+    "name": "forgeWebUI",
+    "displayName": "Forge WebUI",
+    "type": "AI Art",
+    "icon": "./assets/apps/forgewebui.png",
+    "downloadType": "zip",
+    "description": "Forge WebUI 是一款基於 Stable Diffusion 的本地 AI 藝術生成工具，提供用戶友好的界面和多種自定義選項，讓用戶能夠輕鬆創作高質量的 AI 藝術作品。",
+    "version": "1.0.0",
+    "size": "1.2GB",
+    "publisher": "Forge AI",
+    "releaseDate": "2024-05-05",
+    "requirements": [
+      "作業系統: Windows 10/11 或 macOS 12+",
+      "記憶體: 至少 16GB RAM",
+      "處理器: Intel i7 或 AMD Ryzen 7 以上",
+      "GPU: NVIDIA GPU (建議使用 CUDA 支援)"
+    ],
+    "features": [
+      "基於 Stable Diffusion 的高質量圖像生成",
+      "多種藝術風格和過濾器選項",
+      "用戶友好的界面設計",
+      "支援批次圖像生成",
+      "本地運行，保護用戶隱私"
+    ]
   }
 ]

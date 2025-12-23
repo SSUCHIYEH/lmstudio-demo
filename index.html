@@ -62,7 +62,7 @@
           dropdownOpen: false,
           type: 'All Types',
           search: '',
-          types: ['All Types', 'Audio', 'AI Chat', 'Video', 'Document'],
+          types: ['All Types', 'Audio', 'AI Chat', 'PDF', 'AI Art'],
           applications: [],
           allApps: [],
           async init() {
@@ -108,8 +108,8 @@
             </button>
 
             <!-- Dropdown menu -->
-            <div x-show="dropdownOpen" class="absolute top-13 left-0 border border-gray-200 rounded-base shadow-lg w-full">
-              <ul class="py-2">
+            <div x-show="dropdownOpen" class="absolute z-10 top-13 left-0 border border-gray-200 rounded-base shadow-lg w-full bg=white">
+              <ul class="py-2 bg-white">
                 <template x-for="t in types" :key="t">
                   <li @click="selectType(t)" x-text="t" class="px-4 py-3 leading-6 hover:bg-[#2B7FFF]/4 active:bg-[#2B7FFF]/12" @click="type = t; open = false"></li>
                 </template>
@@ -134,7 +134,7 @@
                   </button>
 
                   <button :class="{'!flex': status == 'downloaded'}" class="hidden justify-center items-center cursor-pointer rounded-md flex-1 mt-4 px-3 py-2 bg-[#2B7FFF] hover:bg-[#2B7FFF]/25 text-sm text-white" @click="install">
-                    <img src="./assets/icons/link.svg" class="size-4.5" />
+                    <img src="./assets/icons/download.svg" class="size-4.5" />
                   </button>
 
                   <div x-show="status == 'installing'">安裝中...</div>

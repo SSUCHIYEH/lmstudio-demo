@@ -17,9 +17,6 @@ const ApplicationManager = (params = {}) => ({
     // 監聽進度事件
     ipcRenderer.on(`${this.name}-download-progress`, (event, data) => {
       this.downloadPercent = data.percent;
-      // if (this.downloadPercent === 100) {
-      //   this.status = 'downloaded';
-      // }
     });
 
     if (type === 'zip') {

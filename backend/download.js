@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const fetch = require('node-fetch');
 const unzipper = require('unzipper');
+const Seven = require('node-7z');
+const sevenBin = require('7zip-bin');
 
 // 軟體配置設定
 const SOFTWARE_CONFIG = {
@@ -13,7 +15,8 @@ const SOFTWARE_CONFIG = {
     tempFileName: 'LMStudio-Setup.exe',
     localAppPath: 'LM Studio',
     programFilesPath: 'LM Studio',
-    uninstallerName: 'Uninstall LM Studio.exe'
+    uninstallerName: 'Uninstall LM Studio.exe',
+    launcherName: 'LM Studio.exe'
   },
   anythingllm: {
     name: 'AnythingLLM',
@@ -39,7 +42,29 @@ const SOFTWARE_CONFIG = {
     localAppPath: 'Buzz',
     programFilesPath: 'Buzz',
     uninstallerName: 'unins000.exe',
+    launcherName: 'Buzz.exe',
     folder: 'Buzz'
+  },
+  pdfgear: {
+    name: 'PDFgear',
+    url: 'https://downloadfiles.pdfgear.com/releases/windows/pdfgear_setup_v2.1.14.exe',
+    tempFileName: 'pdfgear_setup_v2.1.14.exe',
+    localAppPath: 'PDFgear',
+    programFilesPath: 'PDFgear',
+    uninstallerName: 'unins000.exe',
+    launcherName: 'PDFLauncher.exe',
+    spawn: true,
+  },
+  forgeWebUI: {
+    name: 'forgeWebUI',
+    url: 'https://github.com/lllyasviel/stable-diffusion-webui-forge/releases/download/latest/webui_forge_cu121_torch231.7z',
+    tempZipName: 'webui_forge_cu121_torch231.7z',
+    localAppPath: 'forgeWebUI',
+    programFilesPath: 'forgeWebUI',
+    launcherName: 'run.bat',
+    folder: 'forgeWebUI',
+    spawn: true,
+    noInstall: true
   }
 };
 
@@ -54,14 +79,17 @@ function getSoftwareConfig(softwareType = DEFAULT_SOFTWARE) {
 
   const result = {
     ...config,
-    tempExePath: path.join(os.tmpdir(), config.tempFileName),
     localAppPath: path.join(process.env.LOCALAPPDATA || 'C:\\Users\\' + os.userInfo().username + '\\AppData\\Local', 'Programs', config.localAppPath),
     programFilesPath: path.join(process.env.ProgramFiles || 'C:\\Program Files', config.programFilesPath)
   }
 
   if (config.tempZipName) {
     result.tempZipPath = path.join(os.tmpdir(), config.folder, config.tempZipName);
-    result.tempExePath = path.join(os.tmpdir(), config.folder, config.tempFileName);
+    if(config.tempFileName) {
+      result.tempExePath = path.join(os.tmpdir(), config.folder, config.tempFileName);
+    }
+  } else if(config.tempFileName) {
+    result.tempExePath = path.join(os.tmpdir(), config.tempFileName)
   }
 
   return result;
@@ -139,23 +167,14 @@ async function downloadZipAndUnzip(config, onProgress) {
     if (!fs.existsSync(config.tempZipPath)) {
       await downloadFile(config.url, config.tempZipPath, onProgress);
       console.log('download complete');
-      console.log(`start unzip ${config.name}...`);
-      // 解壓縮 zip 檔到 tmp/buzz
-      await fs.createReadStream(config.tempZipPath)
-              .pipe(unzipper.Extract({ path: path.join(os.tmpdir(), config.folder) }))
-              .promise();
-      console.log('unzip complete');
+      await upZip(config)
+
       return true
     } else {
       console.log('zip file already exists, skipping download');
       console.log(config.tempExePath)
       if (!fs.existsSync(config.tempExePath)){
-        console.log(`start unzip ${config.name}...`);
-        // 解壓縮 zip 檔到 tmp/buzz
-        await fs.createReadStream(config.tempZipPath)
-                .pipe(unzipper.Extract({ path: path.join(os.tmpdir(), config.folder) }))
-                .promise();
-        console.log('unzip complete');
+        await upZip(config)
       } else {
         console.log('alreadyd unzip');
       }
@@ -164,6 +183,41 @@ async function downloadZipAndUnzip(config, onProgress) {
   } catch (err) {
     console.error('download and unzip failed:', err);
     return false
+  }
+}
+
+async function upZip(config) {
+  try {
+    console.log(`start unzip ${config.name}...`);
+    // 解壓縮 zip 檔到 tmp/buzz
+    if (config.tempZipPath.endsWith('.7z')) {
+      if (!fs.existsSync(config.localAppPath)) {
+        fs.mkdirSync(config.localAppPath, { recursive: true });
+      }
+
+      const myStream = Seven.extractFull(config.tempZipPath, config.localAppPath, {
+        $bin: sevenBin.path7za,
+        recursive: true
+      });
+
+      return new Promise((resolve, reject) => {
+        myStream.on('end', () => {
+          console.log('unzip complete');
+          resolve();
+        });
+        myStream.on('error', (err) => {
+          console.error('7z extraction error:', err);
+          reject(err);
+        });
+      });
+    } else {
+      await fs.createReadStream(config.tempZipPath)
+              .pipe(unzipper.Extract({ path: path.join(os.tmpdir(), config.folder) }))
+              .promise();
+    }
+    console.log('unzip complete');
+  } catch (err) {
+    console.error('unzip failed:', err);
   }
 }
 
@@ -185,6 +239,9 @@ async function downloadZip(softwareType = DEFAULT_SOFTWARE, onProgress) {
 async function install(softwareType = DEFAULT_SOFTWARE) {
   try {
     const config = getSoftwareConfig(softwareType);
+    if (config.noInstall) {
+      return true
+    }
     // 執行 Windows 靜默安裝
     await runCommand(`"${config.tempExePath}" /S /D="${config.localAppPath}"`);
     console.log('install complete');
@@ -209,13 +266,50 @@ async function install(softwareType = DEFAULT_SOFTWARE) {
 
 async function execute(softwareType = DEFAULT_SOFTWARE) {
   const config = getSoftwareConfig(softwareType);
-
+  
   if (fs.existsSync(config.localAppPath)) {
-    const exe = path.join(config.localAppPath, `${config.name}.exe`);
-      
+    const exe = path.join(config.localAppPath, `${config.launcherName}`);
+    console.log(`execute ${exe}...`);
     if (fs.existsSync(exe)) {
-      await runCommand(`"${exe}" /S`);
+      console.log(`found launcher at ${exe}`);
+      if (config.spawn == true) {
+        return await spawnExecute(config);
+      }
+      else {
+        await runCommand(`"${exe}" /S`);
+      }
     }
+  }
+}
+
+async function spawnExecute(config) {
+  try {
+    console.log(`Attempting to spawn execute ${config.name}...`);
+    const exePath = path.join(config.localAppPath, `${config.launcherName}`);
+    
+    if (config.launcherName.endsWith('.bat')) {
+      child = spawn('cmd.exe', ['/c', exePath], {
+        detached: true,
+        stdio: 'ignore',
+        shell: false,
+        windowsHide: false,
+        cwd: config.localAppPath // 設定工作目錄
+      });
+    } else {
+      child = spawn(exePath, [], {
+        detached: true,
+        stdio: 'ignore',
+        shell: false,
+        windowsHide: false
+      });
+    }
+    child.unref();
+
+    console.log(`${config.name} launched successfully`);
+    return true;
+  } catch (err) {
+    console.error(`Failed to execute ${softwareType}:`, err);
+    return false;
   }
 }
 
@@ -289,7 +383,7 @@ async function status(softwareType = DEFAULT_SOFTWARE) {
     return 'installed';
   }
 
-  if (fs.existsSync(config.tempExePath) || fs.existsSync(config.tempZipPath)) {
+  if (config.name != 'forgeWebUI' && (fs.existsSync(config.tempExePath) || fs.existsSync(config.tempZipPath))) {
     console.log(`${config.name} download found`);
     return 'downloaded';
   }

@@ -20,7 +20,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "assets/icon.ico",
@@ -42,6 +44,8 @@
     "tailwindcss": "^4.1.14"
   },
   "dependencies": {
+    "7zip-bin": "^5.2.0",
+    "node-7z": "^3.0.0",
     "node-fetch": "^2.7.0",
     "nodemon": "^3.1.10",
     "systeminformation": "^5.27.11",

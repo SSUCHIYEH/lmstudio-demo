@@ -34,7 +34,7 @@ app.whenReady().then(createWindow);
 
 // 下載與安裝管理
 
-ipcMain.handle('download-install', async (_event, name) => {
+ipcMain.handle('exe-download', async (_event, name) => {
   const win = BrowserWindow.getFocusedWindow();
   return await download.downloadExe(name, (downloaded, total) => {
     win.webContents.send(`${name}-download-progress`, {
