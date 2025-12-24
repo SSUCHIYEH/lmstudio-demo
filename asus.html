@@ -89,7 +89,7 @@
           <dl class="flex text-sm font-medium text-[#333333]">
             <dd class="w-50 p-4">CPU</dd>
             <dd class="flex-1 flex p-4">
-              <span x-text="cpu"></span>核心數 <span x-text="cpuCores"></span>
+              <span x-text="cpu"></span>核心數&nbsp;<span x-text="cpuCores"></span>
             </dd>
             <dd class="w-50 p-4">
               <div class="flex items-center" x-show="cpu != ''">
@@ -130,7 +130,9 @@
           </dl>
           <dl class="flex text-sm font-medium text-[#333333]">
             <dd class="w-50 p-4">RAM 容量</dd>
-            <dd class="flex-1 p-4" x-text="memory"></dd>
+            <dd class="flex-1 p-4">
+              <span x-text="memory"></span> GB
+            </dd>
             <dd class="w-50 p-4">
               <div class="flex items-center" x-show="memory != ''">
                 <p class="text-sm text-[#00C950]">通過</p>
