@@ -65,7 +65,7 @@
           <p class="text-[#1E2939] font-medium text-lg">硬體設備與資源檢測</p>
           <div>
             <button :class="{'!block': status == 'initial'}" class="hidden cursor-pointer px-2.5 py-2 rounded-md border border-[#0D51CD] text-sm font-medium text-[#0D51CD] hover:text-[#0D51CD]/70" @click="checkHardware()">開始檢測</button>
-            <button :class="{'!block': status == 'finished'}" class="hidden cursor-pointer px-2.5 py-2 rounded-md border border-[#0D51CD] text-sm font-medium text-[#0D51CD]">下載檢測報告</button>
+            <button :class="{'!block': status == 'finished'}" class="hidden cursor-pointer px-2.5 py-2 rounded-md border border-[#0D51CD] text-sm font-medium text-[#0D51CD] hover:text-[#0D51CD]/70" @click="downloadReport()">下載檢測報告</button>
           </div>
         </div>
 
